@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中3理科「仕事と仕事率」完全マスタードリル</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        /* カスタムスライダー */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -7px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        .tab-active {
+            background-color: #2563eb;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        }
+        .svg-container {
+            width: 100%;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ヘッダー -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-2">
+                <span class="bg-blue-600 text-xs font-bold px-2.5 py-1 rounded-md">中3理科</span>
+                <h1 class="text-lg md:text-xl font-bold tracking-tight">仕事と仕事率 計算＆シミュレーター</h1>
+            </div>
+            <div class="flex items-center space-x-4 text-sm">
+                <div class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+                    正解数: <span id="score-correct" class="font-bold text-emerald-400">0</span> / <span id="score-total">0</span> 問
+                </div>
+                <button onclick="generateProblem()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded-lg text-xs md:text-sm transition shadow-sm flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    別の数値を出す
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-3 py-4 md:p-6 space-y-5">
+
+        <!-- パターン選択タブ -->
+        <section class="bg-white p-2.5 rounded-2xl shadow-sm border border-slate-200">
+            <div class="text-xs font-bold text-slate-400 px-2 mb-1.5">学習する問題パターンを選択（ランダムも可）</div>
+            <div class="flex overflow-x-auto pb-1 gap-1.5 no-scrollbar" id="category-tabs">
+                <button onclick="selectCategory('random')" id="tab-random" class="tab-active whitespace-nowrap px-3.5 py-2 rounded-xl text-xs md:text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">🎲 ランダム出題</button>
+                <button onclick="selectCategory('slope')" id="tab-slope" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs md:text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">📐 ① 斜面</button>
+                <button onclick="selectCategory('friction')" id="tab-friction" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs md:text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">🧱 ② 摩擦力</button>
+                <button onclick="selectCategory('lever1')" id="tab-lever1" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs md:text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">⚖️ ③ てこ(シーソー)</button>
+                <button onclick="selectCategory('lever2')" id="tab-lever2" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs md:text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">📏 ④ てこ(端が支点)</button>
+                <button onclick="selectCategory('pulley1')" id="tab-pulley1" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs md:text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">⚙️ ⑤ 動滑車(基本)</button>
+                <button onclick="selectCategory('pulley2')" id="tab-pulley2" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs md:text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">🏗️ ⑥ 動滑車(応用)</button>
+                <button onclick="selectCategory('wheel')" id="tab-wheel" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs md:text-sm transition bg-slate-100 text-slate-700 hover:bg-slate-200">🎯 ⑦ 輪軸</button>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- 左カラム：問題文とインタラクティブ図解（シミュレーター） -->
+            <div class="lg:col-span-7 space-y-4">
+                
+                <!-- 問題カード -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-800 text-white px-4 py-2.5 flex justify-between items-center">
+                        <span id="problem-badge" class="text-xs font-bold bg-blue-500 px-2.5 py-0.5 rounded-full">斜面</span>
+                        <span class="text-xs text-slate-300">※100gの物体にはたらく重力を1Nとする</span>
+                    </div>
+                    <div class="p-4 md:p-5">
+                        <p id="problem-statement" class="text-base md:text-lg font-medium leading-relaxed text-slate-800">
+                            ここに問題文が表示されます。
+                        </p>
+                        <p id="problem-condition" class="mt-2 text-xs text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            ※道具の重さや摩擦、ひもの重さは考えないものとします。
+                        </p>
+                    </div>
+
+                    <!-- 図解・シミュレーターキャンバス -->
+                    <div class="border-t border-slate-100 bg-slate-50 p-3 md:p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-slate-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                                視覚イメージ・シミュレーター
+                            </span>
+                            <button onclick="toggleHintMode()" id="btn-sim-toggle" class="text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1 rounded-full transition flex items-center gap-1 shadow-sm">
+                                💡 ヒント＆数値ガイドを表示
+                            </button>
+                        </div>
+
+                        <!-- SVG 描画エリア -->
+                        <div class="svg-container bg-white rounded-xl border border-slate-200 shadow-inner overflow-hidden relative">
+                            <svg id="sim-svg" viewBox="0 0 500 310" class="w-full h-auto block select-none"></svg>
+                        </div>
+
+                        <!-- シミュレーター操作バー -->
+                        <div class="mt-3 bg-white p-3 rounded-xl border border-slate-200">
+                            <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                                <span>動かす前 (0%)</span>
+                                <span class="text-blue-600">👆 スライダーを動かして動きを確認！</span>
+                                <span>動かした後 (100%)</span>
+                            </div>
+                            <input type="range" id="sim-slider" min="0" max="100" value="0" class="w-full" oninput="updateSimulator(this.value)">
+                            <div id="sim-hint-box" class="hidden mt-3 pt-3 border-t border-dashed border-slate-200 text-xs md:text-sm text-amber-900 bg-amber-50/70 p-3 rounded-lg space-y-1">
+                                <div class="font-bold text-amber-800 flex items-center gap-1">
+                                    <span>🔍 注目ポイント（仕事の原理）</span>
+                                </div>
+                                <p id="hint-text" class="leading-relaxed"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右カラム：設問・解答入力・解説 -->
+            <div class="lg:col-span-5 space-y-4">
+                
+                <!-- 4つの設問フォーム -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <h2 class="font-bold text-base md:text-lg text-slate-800 flex items-center gap-2">
+                            <span>✏️</span> 4つの値を求めよう
+                        </h2>
+                        <span class="text-xs text-rose-600 font-semibold bg-rose-50 px-2.5 py-1 rounded-md border border-rose-200">
+                            ⚠️ cm や g の単位換算に注意！
+                        </span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <!-- (1) 引く力 -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 transition" id="card-q1">
+                            <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1.5" id="label-q1">
+                                (1) ひもを引く力（動かす力）の大きさは？
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" step="0.01" id="input-f" placeholder="数値を入力" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-base font-bold text-slate-800">
+                                <span class="font-bold text-slate-700 bg-slate-200 px-3 py-2 rounded-lg text-sm">N</span>
+                                <span id="mark-f" class="text-lg font-bold w-8 text-center"></span>
+                            </div>
+                            <p id="feedback-f" class="hidden text-xs mt-1.5 font-medium"></p>
+                        </div>
+
+                        <!-- (2) 引く長さ -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 transition" id="card-q2">
+                            <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1.5" id="label-q2">
+                                (2) ひもを引く長さ（力を加えて動かした距離）は？
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" step="0.01" id="input-d" placeholder="m(メートル)で入力" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-base font-bold text-slate-800">
+                                <span class="font-bold text-slate-700 bg-slate-200 px-3 py-2 rounded-lg text-sm">m</span>
+                                <span id="mark-d" class="text-lg font-bold w-8 text-center"></span>
+                            </div>
+                            <p id="feedback-d" class="hidden text-xs mt-1.5 font-medium"></p>
+                        </div>
+
+                        <!-- (3) 仕事 -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 transition" id="card-q3">
+                            <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1.5">
+                                (3) このときにした「仕事」の大きさは？
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" step="0.01" id="input-w" placeholder="力(N) × 距離(m)" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-base font-bold text-slate-800">
+                                <span class="font-bold text-slate-700 bg-slate-200 px-3 py-2 rounded-lg text-sm">J</span>
+                                <span id="mark-w" class="text-lg font-bold w-8 text-center"></span>
+                            </div>
+                            <p id="feedback-w" class="hidden text-xs mt-1.5 font-medium"></p>
+                        </div>
+
+                        <!-- (4) 仕事率 -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 transition" id="card-q4">
+                            <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1.5">
+                                (4) このときの「仕事率」の大きさは？
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" step="0.01" id="input-p" placeholder="仕事(J) ÷ 時間(s)" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-base font-bold text-slate-800">
+                                <span class="font-bold text-slate-700 bg-slate-200 px-3 py-2 rounded-lg text-sm">W</span>
+                                <span id="mark-p" class="text-lg font-bold w-8 text-center"></span>
+                            </div>
+                            <p id="feedback-p" class="hidden text-xs mt-1.5 font-medium"></p>
+                        </div>
+                    </div>
+
+                    <!-- アクションボタン -->
+                    <div class="pt-2 flex gap-2">
+                        <button onclick="checkAnswers()" id="btn-submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition text-base">
+                            答え合わせをする
+                        </button>
+                        <button onclick="generateProblem()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-4 rounded-xl transition text-sm">
+                            次の問題 ➔
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 解説ボックス（解答後に展開） -->
+                <div id="explanation-panel" class="hidden bg-white rounded-2xl shadow-sm border-2 border-blue-500 overflow-hidden">
+                    <div class="bg-blue-600 text-white px-4 py-2.5 font-bold text-sm flex justify-between items-center">
+                        <span>📖 詳しい解説と計算ステップ</span>
+                        <span class="text-xs bg-blue-800 px-2 py-0.5 rounded">シミュレーターも最大に動きました！</span>
+                    </div>
+                    <div id="explanation-content" class="p-4 text-xs md:text-sm space-y-2.5 text-slate-700 leading-relaxed">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 状態管理
+        let currentCategory = 'random';
+        let currentProblem = null;
+        let showHint = false;
+        let scoreCorrect = 0;
+        let scoreTotal = 0;
+        let hasScoredCurrent = false;
+
+        const categories = ['slope', 'friction', 'lever1', 'lever2', 'pulley1', 'pulley2', 'wheel'];
+        const categoryNames = {
+            slope: '① 斜面（坂道）',
+            friction: '② 摩擦力と仕事',
+            lever1: '③ てこ（シーソー型）',
+            lever2: '④ てこ（端が支点）',
+            pulley1: '⑤ 動滑車（基本1つ）',
+            pulley2: '⑥ 動滑車（応用・重さあり/複数）',
+            wheel: '⑦ 輪軸（りんじく）'
+        };
+
+        // ランダム選択ヘルパー
+        function pick(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // 数値フォーマット（小数第2位まで綺麗に）
+        function fmt(num) {
+            return Math.round(num * 100) / 100;
+        }
+
+        // 単位をランダムにgかkg、cmかmにするヘルパー（引っ掛け練習用）
+        function formatMassText(kg) {
+            if (Math.random() < 0.45 && kg < 2) {
+                return `${Math.round(kg * 1000)}g`;
+            }
+            return `${kg}kg`;
+        }
+
+        function formatDistText(m) {
+            if (Math.random() < 0.5 && m < 2.5) {
+                return `${Math.round(m * 100)}cm`;
+            }
+            return `${m}m`;
+        }
+
+        // カテゴリ切り替え
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('#category-tabs button').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+            });
+            const activeBtn = document.getElementById(`tab-${cat}`);
+            if (activeBtn) {
+                activeBtn.classList.add('tab-active');
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-700');
+            }
+            generateProblem();
+        }
+
+        // ヒントモード切り替え
+        function toggleHintMode() {
+            showHint = !showHint;
+            const hintBox = document.getElementById('sim-hint-box');
+            const btn = document.getElementById('btn-sim-toggle');
+            if (showHint) {
+                hintBox.classList.remove('hidden');
+                btn.innerHTML = '🙈 ヒントを隠す';
+                btn.classList.replace('bg-amber-100', 'bg-amber-500');
+                btn.classList.replace('text-amber-800', 'text-white');
+            } else {
+                hintBox.classList.add('hidden');
+                btn.innerHTML = '💡 ヒント＆数値ガイドを表示';
+                btn.classList.replace('bg-amber-500', 'bg-amber-100');
+                btn.classList.replace('text-white', 'text-amber-800');
+            }
+            updateSimulator(document.getElementById('sim-slider').value);
+        }
+
+        // 問題の生成ロジック
+        function generateProblem() {
+            hasScoredCurrent = false;
+            showHint = false;
+            document.getElementById('sim-hint-box').classList.add('hidden');
+            const btnHint = document.getElementById('btn-sim-toggle');
+            btnHint.innerHTML = '💡 ヒント＆数値ガイドを表示';
+            btnHint.className = 'text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1 rounded-full transition flex items-center gap-1 shadow-sm';
+
+            // 入力欄リセット
+            ['f', 'd', 'w', 'p'].forEach((key, idx) => {
+                const input = document.getElementById(`input-${key}`);
+                input.value = '';
+                input.disabled = false;
+                document.getElementById(`mark-${key}`).innerHTML = '';
+                const fb = document.getElementById(`feedback-${key}`);
+                fb.classList.add('hidden');
+                fb.innerHTML = '';
+                const card = document.getElementById(`card-q${idx+1}`);
+                card.className = 'p-3 rounded-xl bg-slate-50 border border-slate-200 transition';
+            });
+            document.getElementById('explanation-panel').classList.add('hidden');
+            document.getElementById('sim-slider').value = 0;
+
+            const type = currentCategory === 'random' ? pick(categories) : currentCategory;
+            document.getElementById('problem-badge').textContent = categoryNames[type];
+
+            let p = { type };
+
+            if (type === 'slope') {
+                // 斜面
+                const ratio = pick([2, 2.5, 4, 5]);
+                const h = pick([0.4, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5]);
+                const L = fmt(h * ratio);
+                const weightN = pick([10, 20, 30, 40, 50, 60]);
+                const massKg = weightN / 10;
+                const F = fmt(weightN / ratio);
+                const W = fmt(weightN * h);
+                const validTimes = [1, 2, 4, 5, 8, 10, 20].filter(t => (W / t) * 100 % 1 === 0);
+                const time = pick(validTimes.length ? validTimes : [1]);
+                const P = fmt(W / time);
+
+                const massStr = formatMassText(massKg);
+                const hStr = formatDistText(h);
+                const LStr = formatDistText(L);
+
+                p = {
+                    ...p, massKg, weightN, h, L, ratio, time,
+                    massStr, hStr, LStr,
+                    ansF: F, ansD: L, ansW: W, ansP: P,
+                    q1Label: '(1) 斜面にそって台車を引く力の大きさは？',
+                    q2Label: '(2) 台車を斜面にそって引いた距離は？',
+                    statement: `質量 <strong class="text-blue-700 underline">${massStr}</strong> の台車を、斜面にそって <strong class="text-blue-700 underline">${LStr}</strong> 引き上げ、元の高さから <strong class="text-blue-700 underline">${hStr}</strong> 高い位置まで <strong class="text-blue-700 underline">${time}秒間</strong> かけて一定の速さで移動させました。`,
+                    condition: '※斜面と台車の間の摩擦は考えないものとします。',
+                    hint: `直接真上に持ち上げる仕事は「重力 ${weightN}N × 高さ ${h}m ＝ ${W}J」です。斜面を使うと移動距離が ${L}m（高さの${ratio}倍）に伸びるかわりに、必要な力は 1/${ratio} になります！`,
+                    explanation: [
+                        `<strong>① 単位の確認と重力：</strong> 質量 ${massStr} ＝ ${massKg}kg ＝ ${massKg*1000}g です。100gで1Nなので、台車にはたらく重力は <strong>${weightN}N</strong> です。また、高さ ${hStr} ＝ <strong>${h}m</strong>、斜面の長さ ${LStr} ＝ <strong>${L}m</strong> です。`,
+                        `<strong>② 仕事の大きさ(3)：</strong> 「仕事の原理」より、斜面を使っても直接持ち上げても仕事の大きさは変わりません。真上に持ち上げる仕事は、${weightN}N × ${h}m ＝ <strong>${W}J</strong> です。`,
+                        `<strong>③ 引く距離(2)と引く力(1)：</strong> 斜面にそって引いた距離は <strong>${L}m</strong> です。仕事が ${W}J なので、引く力は ${W}J ÷ ${L}m ＝ <strong>${F}N</strong> となります（距離が${ratio}倍なので力は1/${ratio}）。`,
+                        `<strong>④ 仕事率(4)：</strong> ${time}秒間かかっているので、${W}J ÷ ${time}s ＝ <strong>${P}W</strong> です。`
+                    ]
+                };
+            } 
+            else if (type === 'friction') {
+                // 摩擦力
+                const weightN = pick([10, 20, 30, 40, 50]);
+                const massKg = weightN / 10;
+                const F = pick([2, 4, 5, 6, 8, 12, 15]); // 摩擦力
+                const d = pick([0.5, 0.8, 1.2, 1.5, 2.0, 2.5, 3.0]);
+                const W = fmt(F * d);
+                const validTimes = [1, 2, 3, 4, 5, 6, 10].filter(t => (W / t) * 100 % 1 === 0);
+                const time = pick(validTimes.length ? validTimes : [1]);
+                const P = fmt(W / time);
+
+                const massStr = formatMassText(massKg);
+                const dStr = formatDistText(d);
+
+                p = {
+                    ...p, massKg, weightN, F, d, time, massStr, dStr,
+                    ansF: F, ansD: d, ansW: W, ansP: P,
+                    q1Label: '(1) ばねばかりで水平に引く力の大きさは？',
+                    q2Label: '(2) 物体を水平に動かした距離は？',
+                    statement: `水平な床の上に置いた質量 <strong class="text-blue-700 underline">${massStr}</strong> の物体を、ばねばかりで水平に引いて <strong class="text-blue-700 underline">${dStr}</strong> の距離を <strong class="text-blue-700 underline">${time}秒間</strong> かけて一定の速さで動かしました。このとき、物体と床の間にはたらく摩擦力は <strong class="text-blue-700 underline">${F}N</strong> でした。`,
+                    condition: '※⚠️ひっかけ注意！水平に動かすとき、物体の「質量（重力）」は仕事の計算に使うでしょうか？',
+                    hint: `物体を「水平」に一定の速さで動かすとき、手が引く力は「床との摩擦力（${F}N）」とつり合っています。下向きの重力（${weightN}N）の向きには動いていないため、重力の数値は計算には使いません！`,
+                    explanation: [
+                        `<strong>① ひっかけに注意！（引く力(1)）：</strong> 水平方向に一定の速さで動かすとき、引く力は摩擦力とつり合うので <strong>${F}N</strong> です。（※質量 ${massStr} は重力 ${weightN}N ですが、縦方向には動かしていないので計算には使いません！）`,
+                        `<strong>② 動かした距離(2)：</strong> ${dStr} をメートルに直すと <strong>${d}m</strong> です。`,
+                        `<strong>③ 仕事の大きさ(3)：</strong> 摩擦力に逆らってした仕事は、引く力 ${F}N × 距離 ${d}m ＝ <strong>${W}J</strong> です。`,
+                        `<strong>④ 仕事率(4)：</strong> ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                    ]
+                };
+            }
+            else if (type === 'lever1') {
+                // てこ（シーソー型：支点が間にある）
+                const ratio = pick([2, 3, 4]);
+                const L_load = pick([20, 30, 40]); // cm
+                const L_effort = L_load * ratio; // cm
+                const baseF = pick([4, 5, 6, 8, 10, 12, 15]); // 割り切れない小数を防ぐため、引く力(F)を基準に生成
+                const weightN = baseF * ratio;
+                const F = baseF;
+                const h = pick([0.1, 0.2, 0.3, 0.4, 0.5]); // m
+                const d = fmt(h * ratio); // m
+                const W = fmt(weightN * h);
+                const validTimes = [1, 2, 3, 4, 5, 6, 10].filter(t => (W / t) * 100 % 1 === 0);
+                const time = pick(validTimes.length ? validTimes : [1]);
+                const P = fmt(W / time);
+
+                const massKg = weightN / 10;
+                const massStr = formatMassText(massKg);
+                const hStr = formatDistText(h);
+
+                p = {
+                    ...p, massKg, weightN, L_load, L_effort, ratio, h, d, time, massStr, hStr,
+                    ansF: F, ansD: d, ansW: W, ansP: P,
+                    q1Label: '(1) 力点（右端）を下に押す力の大きさは？',
+                    q2Label: '(2) 力点（右端）を下に押し下げた距離は？',
+                    statement: `てこの支点から左へ <strong class="text-blue-700 underline">${L_load}cm</strong> の位置（作用点）に質量 <strong class="text-blue-700 underline">${massStr}</strong> のおもりをぶら下げました。支点から右へ <strong class="text-blue-700 underline">${L_effort}cm</strong> の位置（力点）を真下に押して、おもりを <strong class="text-blue-700 underline">${hStr}</strong> の高さまで <strong class="text-blue-700 underline">${time}秒間</strong> かけて持ち上げました。`,
+                    condition: '※てこの棒の重さや摩擦は考えないものとします。',
+                    hint: `支点からの距離の比が「作用点：力点 ＝ ${L_load}cm：${L_effort}cm ＝ 1：${ratio}」になっています。そのため、押す力は重力の 1/${ratio} になり、押し下げる距離はおもりが上がる高さの ${ratio}倍 になります！`,
+                    explanation: [
+                        `<strong>① 支点からの距離の比：</strong> 支点〜作用点が ${L_load}cm、支点〜力点が ${L_effort}cm なので、距離の比は <strong>1：${ratio}</strong> です。`,
+                        `<strong>② 押す力(1)：</strong> おもりの重力は ${massStr} ＝ <strong>${weightN}N</strong> です。力点までの距離が ${ratio}倍 なので、必要な力は 1/${ratio} の ${weightN}N ÷ ${ratio} ＝ <strong>${F}N</strong> になります。`,
+                        `<strong>③ 押し下げる距離(2)：</strong> おもりは ${hStr} ＝ <strong>${h}m</strong> 上がりました。力点は ${ratio}倍 動くので、${h}m × ${ratio} ＝ <strong>${d}m</strong> 押し下げます。`,
+                        `<strong>④ 仕事(3)と仕事率(4)：</strong> 仕事は ${F}N × ${d}m（または ${weightN}N × ${h}m）＝ <strong>${W}J</strong>。仕事率は ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                    ]
+                };
+            }
+            else if (type === 'lever2') {
+                // てこ（端が支点）
+                const ratio = pick([2, 3, 4]);
+                const L_load = pick([20, 30, 40]); // 支点からおもりまで(cm)
+                const L_total = L_load * ratio; // 棒全体の長さ(支点から力点まで)(cm)
+                const L_between = L_total - L_load; // おもりから力点まで(cm)
+                const baseF = pick([5, 6, 8, 10, 12, 15]); // 割り切れない小数を防ぐ
+                const weightN = baseF * ratio;
+                const F = baseF;
+                const h = pick([0.1, 0.2, 0.3, 0.4]);
+                const d = fmt(h * ratio);
+                const W = fmt(weightN * h);
+                const validTimes = [1, 2, 3, 4, 5, 6].filter(t => (W / t) * 100 % 1 === 0);
+                const time = pick(validTimes.length ? validTimes : [1]);
+                const P = fmt(W / time);
+
+                const massKg = weightN / 10;
+                const massStr = formatMassText(massKg);
+                const hStr = formatDistText(h);
+
+                p = {
+                    ...p, massKg, weightN, L_load, L_total, L_between, ratio, h, d, time, massStr, hStr,
+                    ansF: F, ansD: d, ansW: W, ansP: P,
+                    q1Label: '(1) 棒の右端（力点）を上に引き上げる力の大きさは？',
+                    q2Label: '(2) 棒の右端（力点）を引き上げた距離は？',
+                    statement: `左端を支点とする長さ <strong class="text-blue-700 underline">${L_total}cm</strong> の棒があります。支点から <strong class="text-blue-700 underline">${L_load}cm</strong> の位置に質量 <strong class="text-blue-700 underline">${massStr}</strong> のおもりを下げ、棒の右端（支点から${L_total}cmの位置）を真上に引いて、おもりを <strong class="text-blue-700 underline">${hStr}</strong> の高さまで <strong class="text-blue-700 underline">${time}秒間</strong> で持ち上げました。`,
+                    condition: '※棒の重さは考えないものとします。必ず「支点からの距離」で比を考えましょう！',
+                    hint: `よくあるミスは「おもりから右端までの距離（${L_between}cm）」で比を作ってしまうことです！必ず左端の「支点からの距離」である ${L_load}cm と ${L_total}cm（比は 1：${ratio}）で計算しましょう。`,
+                    explanation: [
+                        `<strong>① 支点からの距離の比（重要）：</strong> 支点からおもりまでが ${L_load}cm、支点から力点（右端）までが ${L_total}cm なので、距離の比は <strong>1：${ratio}</strong> です。`,
+                        `<strong>② 引き上げる力(1)：</strong> おもりの重力は ${massStr} ＝ <strong>${weightN}N</strong>。距離が ${ratio}倍 なので、力は 1/${ratio} の ${weightN} ÷ ${ratio} ＝ <strong>${F}N</strong> です。`,
+                        `<strong>③ 引き上げた距離(2)：</strong> おもりが上がった高さは ${hStr} ＝ <strong>${h}m</strong>。右端はその ${ratio}倍 動くので、${h}m × ${ratio} ＝ <strong>${d}m</strong> です。`,
+                        `<strong>④ 仕事(3)と仕事率(4)：</strong> 仕事は ${F}N × ${d}m ＝ <strong>${W}J</strong>。仕事率は ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                    ]
+                };
+            }
+            else if (type === 'pulley1') {
+                // 動滑車（基本1つ・重さ無視）
+                const weightN = pick([10, 16, 20, 24, 30, 40, 50]);
+                const massKg = weightN / 10;
+                const h = pick([0.2, 0.4, 0.5, 0.6, 0.8, 1.0, 1.5]);
+                const F = fmt(weightN / 2);
+                const d = fmt(h * 2);
+                const W = fmt(weightN * h);
+                const validTimes = [1, 2, 4, 5, 8, 10].filter(t => (W / t) * 100 % 1 === 0);
+                const time = pick(validTimes.length ? validTimes : [1]);
+                const P = fmt(W / time);
+
+                const massStr = formatMassText(massKg);
+                const hStr = formatDistText(h);
+
+                p = {
+                    ...p, massKg, weightN, h, d, time, massStr, hStr,
+                    ansF: F, ansD: d, ansW: W, ansP: P,
+                    q1Label: '(1) ひもを引く力の大きさは？',
+                    q2Label: '(2) ひもを引いた長さは？',
+                    statement: `1つの動滑車と1つの定滑車を組み合わせて、質量 <strong class="text-blue-700 underline">${massStr}</strong> の荷物を <strong class="text-blue-700 underline">${hStr}</strong> の高さまで <strong class="text-blue-700 underline">${time}秒間</strong> かけて引き上げました。`,
+                    condition: '※滑車やひもの重さ、摩擦は考えないものとします。',
+                    hint: `動滑車を1つ使うと、荷物を2本のひもで支えるため「引く力は 1/2」になります。そのかわり、左右2本のひもを両方縮める必要があるため「引くひもの長さは 2倍」になります！定滑車は向きを変えるだけです。`,
+                    explanation: [
+                        `<strong>① 荷物の重力と高さ：</strong> 質量 ${massStr} ＝ 重力 <strong>${weightN}N</strong>、持ち上げる高さ ${hStr} ＝ <strong>${h}m</strong> です。`,
+                        `<strong>② 引く力(1)：</strong> 動滑車を1つ使うと引く力は半分になるので、${weightN}N ÷ 2 ＝ <strong>${F}N</strong> です。`,
+                        `<strong>③ 引く長さ(2)：</strong> 荷物を ${h}m 持ち上げるには、ひもを2倍の ${h}m × 2 ＝ <strong>${d}m</strong> 引く必要があります。`,
+                        `<strong>④ 仕事(3)と仕事率(4)：</strong> 仕事は ${F}N × ${d}m ＝ <strong>${W}J</strong>（直接持ち上げる ${weightN}N × ${h}m と同じ）。仕事率は ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                    ]
+                };
+            }
+            else if (type === 'pulley2') {
+                // 動滑車（応用：①動滑車に重さがある、②動滑車2つ、③動滑車3つ、④板の左右）
+                const subModes = ['heavy_pulley', 'double_pulley', 'triple_pulley', 'board_pulley'];
+                const subMode = pick(subModes);
+
+                if (subMode === 'heavy_pulley') {
+                    // 動滑車に重さがあるパターン（高校入試頻出）
+                    const loadN = pick([16, 20, 26, 30, 36, 40]);
+                    const pulleyN = pick([2, 4, 6]);
+                    const totalN = loadN + pulleyN;
+                    const loadKg = loadN / 10;
+                    const pulleyKg = pulleyN / 10;
+                    const h = pick([0.4, 0.5, 0.8, 1.0, 1.2, 1.5]);
+                    const F = fmt(totalN / 2);
+                    const d = fmt(h * 2);
+                    const W = fmt(F * d); // 人がした仕事は動滑車の分も含む
+                    const validTimes = [1, 2, 3, 4, 5, 6, 10].filter(t => (W / t) * 100 % 1 === 0);
+                    const time = pick(validTimes.length ? validTimes : [1]);
+                    const P = fmt(W / time);
+
+                    const loadStr = formatMassText(loadKg);
+                    const pulleyStr = `${pulleyKg * 1000}g`;
+                    const hStr = formatDistText(h);
+
+                    p = {
+                        ...p, subMode, loadN, pulleyN, totalN, h, d, time, loadStr, pulleyStr, hStr,
+                        ansF: F, ansD: d, ansW: W, ansP: P,
+                        q1Label: '(1) ひもを引く力の大きさは？',
+                        q2Label: '(2) ひもを引いた長さは？',
+                        statement: `【入試応用】質量 <strong class="text-rose-600 underline">${pulleyStr}</strong> の動滑車を使って、質量 <strong class="text-blue-700 underline">${loadStr}</strong> のおもりを <strong class="text-blue-700 underline">${hStr}</strong> の高さまで <strong class="text-blue-700 underline">${time}秒間</strong> かけて引き上げました。このとき人がひもを引いてした仕事を考えます。`,
+                        condition: '※⚠️応用注意！この問題では「動滑車の質量（重さ）」も一緒に持ち上げる必要があります（ひもの重さや摩擦は無視します）。',
+                        hint: `おもり（${loadN}N）だけでなく、動滑車自身（${pulleyStr} ＝ ${pulleyN}N）も一緒に持ち上がります！つまり合計 ${totalN}N を2本のひもで支えるので、引く力は ${totalN}N ÷ 2 ＝ ${F}N になります。`,
+                        explanation: [
+                            `<strong>① 持ち上げる合計の重力：</strong> おもり ${loadStr}（${loadN}N）と動滑車 ${pulleyStr}（${pulleyN}N）を合わせて、合計 <strong>${totalN}N</strong> を持ち上げます。`,
+                            `<strong>② 引く力(1)：</strong> 合計 ${totalN}N を2本のひもで支えるので、引く力は ${totalN}N ÷ 2 ＝ <strong>${F}N</strong> です。`,
+                            `<strong>③ 引く長さ(2)：</strong> おもりと動滑車を ${hStr} ＝ <strong>${h}m</strong> 持ち上げるので、ひもを引く長さは2倍の ${h}m × 2 ＝ <strong>${d}m</strong> です。`,
+                            `<strong>④ 人がした仕事(3)と仕事率(4)：</strong> 人がした仕事は ${F}N × ${d}m ＝ <strong>${W}J</strong> です（※動滑車を持ち上げる無駄な仕事 ${pulleyN * h}J が増えています）。仕事率は ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                        ]
+                    };
+                } else if (subMode === 'double_pulley') {
+                    // 動滑車2つ組み合わせ（力 1/4, 距離 4倍）
+                    const weightN = pick([16, 20, 24, 32, 40, 48]);
+                    const massKg = weightN / 10;
+                    const h = pick([0.2, 0.3, 0.4, 0.5, 0.8, 1.0]);
+                    const F = fmt(weightN / 4);
+                    const d = fmt(h * 4);
+                    const W = fmt(weightN * h);
+                    const validTimes = [1, 2, 4, 5, 8].filter(t => (W / t) * 100 % 1 === 0);
+                    const time = pick(validTimes.length ? validTimes : [1]);
+                    const P = fmt(W / time);
+
+                    const massStr = formatMassText(massKg);
+                    const hStr = formatDistText(h);
+
+                    p = {
+                        ...p, subMode, weightN, massKg, h, d, time, massStr, hStr,
+                        ansF: F, ansD: d, ansW: W, ansP: P,
+                        q1Label: '(1) 右端のひもを引く力の大きさは？',
+                        q2Label: '(2) 右端のひもを引いた長さは？',
+                        statement: `【応用】図のように<strong>動滑車を2つ</strong>組み合わせて、質量 <strong class="text-blue-700 underline">${massStr}</strong> のおもりを <strong class="text-blue-700 underline">${hStr}</strong> の高さまで <strong class="text-blue-700 underline">${time}秒間</strong> かけて引き上げました。`,
+                        condition: '※滑車やひもの重さ、摩擦は考えないものとします。1つ目の動滑車を2つ目の動滑車が支えています。',
+                        hint: `下の動滑車で力が 1/2 になり、それをさらに2つ目の動滑車で支えるので、引く力は「1/2 のさらに半分 ＝ 1/4」になります！そのかわり、ひもを引く長さは「4倍」になります。`,
+                        explanation: [
+                            `<strong>① 動滑車2つのしくみ：</strong> 1つ目の動滑車で重力が半分になり、それをさらに2つ目の動滑車で半分にするため、引く力は元の重力の <strong>1/4</strong>、引く距離は <strong>4倍</strong> になります。`,
+                            `<strong>② 引く力(1)：</strong> おもりの重力は ${massStr} ＝ <strong>${weightN}N</strong>。よって引く力は ${weightN}N ÷ 4 ＝ <strong>${F}N</strong> です。`,
+                            `<strong>③ 引く長さ(2)：</strong> おもりを ${hStr} ＝ <strong>${h}m</strong> 持ち上げるので、ひもは4倍の ${h}m × 4 ＝ <strong>${d}m</strong> 引きます。`,
+                            `<strong>④ 仕事(3)と仕事率(4)：</strong> 仕事は ${F}N × ${d}m ＝ <strong>${W}J</strong>。仕事率は ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                        ]
+                    };
+                } else if (subMode === 'triple_pulley') {
+                    // 動滑車3つ組み合わせ（力 1/8, 距離 8倍）
+                    const weightN = pick([16, 24, 32, 40, 48, 64]);
+                    const massKg = weightN / 10;
+                    const h = pick([0.1, 0.2, 0.3]);
+                    const F = fmt(weightN / 8);
+                    const d = fmt(h * 8);
+                    const W = fmt(weightN * h);
+                    const validTimes = [1, 2, 3, 4, 5].filter(t => (W / t) * 100 % 1 === 0);
+                    const time = pick(validTimes.length ? validTimes : [1]);
+                    const P = fmt(W / time);
+
+                    const massStr = formatMassText(massKg);
+                    const hStr = formatDistText(h);
+
+                    p = {
+                        ...p, subMode, weightN, massKg, h, d, time, massStr, hStr,
+                        ansF: F, ansD: d, ansW: W, ansP: P,
+                        q1Label: '(1) 右端のひもを引く力の大きさは？',
+                        q2Label: '(2) 右端のひもを引いた長さは？',
+                        statement: `【発展】図のように<strong>動滑車を3つ</strong>直列に組み合わせて、質量 <strong class="text-blue-700 underline">${massStr}</strong> のおもりを <strong class="text-blue-700 underline">${hStr}</strong> の高さまで <strong class="text-blue-700 underline">${time}秒間</strong> かけて引き上げました。`,
+                        condition: '※滑車やひもの重さ、摩擦は考えないものとします。動滑車が順にひもを支えています。',
+                        hint: `動滑車を1つ通るごとに力が半分になります。今回は3つなので「1/2 × 1/2 × 1/2 ＝ 1/8」になります！そのかわり、ひもを引く長さは「8倍」になります。`,
+                        explanation: [
+                            `<strong>① 動滑車3つのしくみ：</strong> 動滑車を3つ使うと、引く力は元の重力の <strong>1/8</strong>、引く距離は <strong>8倍</strong> になります。`,
+                            `<strong>② 引く力(1)：</strong> おもりの重力は <strong>${weightN}N</strong>。よって引く力は ${weightN}N ÷ 8 ＝ <strong>${F}N</strong> です。`,
+                            `<strong>③ 引く長さ(2)：</strong> おもりを <strong>${h}m</strong> 持ち上げるので、ひもは8倍の ${h}m × 8 ＝ <strong>${d}m</strong> 引きます。`,
+                            `<strong>④ 仕事(3)と仕事率(4)：</strong> 仕事は ${F}N × ${d}m ＝ <strong>${W}J</strong>。仕事率は ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                        ]
+                    };
+                } else if (subMode === 'board_pulley') {
+                    // 板の左右に動滑車（力 1/4, 距離 4倍）
+                    const weightN = pick([16, 20, 24, 32, 40]);
+                    const massKg = weightN / 10;
+                    const h = pick([0.2, 0.4, 0.5, 0.6]);
+                    const F = fmt(weightN / 4);
+                    const d = fmt(h * 4);
+                    const W = fmt(weightN * h);
+                    const validTimes = [1, 2, 4, 5, 8].filter(t => (W / t) * 100 % 1 === 0);
+                    const time = pick(validTimes.length ? validTimes : [1]);
+                    const P = fmt(W / time);
+
+                    const massStr = formatMassText(massKg);
+                    const hStr = formatDistText(h);
+
+                    p = {
+                        ...p, subMode, weightN, massKg, h, d, time, massStr, hStr,
+                        ansF: F, ansD: d, ansW: W, ansP: P,
+                        q1Label: '(1) ひもを引く力の大きさは？',
+                        q2Label: '(2) ひもを引いた長さは？',
+                        statement: `【応用】板の左右に<strong>動滑車が1つずつ（計2つ）</strong>ついています。1本のひもを両方の動滑車に通して、板に乗せた質量 <strong class="text-blue-700 underline">${massStr}</strong> のおもりを <strong class="text-blue-700 underline">${hStr}</strong> の高さまで水平に保ったまま <strong class="text-blue-700 underline">${time}秒間</strong> で引き上げました。`,
+                        condition: '※板や滑車、ひもの重さ、摩擦は考えないものとします。',
+                        hint: `板の左右にある動滑車（計2つ）は、合計で「4本のひも」で板を上向きに支えています。全体を4本で支えるため、引く力は全体の重力の「1/4」になり、引く距離は「4倍」になります！`,
+                        explanation: [
+                            `<strong>① 4本のひもで支える：</strong> 左右の動滑車にはそれぞれ2本ずつ、合計4本のひもが上に向かって張られています。全体を4本で支えるため、引く力は <strong>1/4</strong> になります。`,
+                            `<strong>② 引く力(1)：</strong> 重力は <strong>${weightN}N</strong>。よって引く力は ${weightN}N ÷ 4 ＝ <strong>${F}N</strong> です。`,
+                            `<strong>③ 引く長さ(2)：</strong> 全体を <strong>${h}m</strong> 持ち上げるので、ひもは4倍の ${h}m × 4 ＝ <strong>${d}m</strong> 引きます。`,
+                            `<strong>④ 仕事(3)と仕事率(4)：</strong> 仕事は ${F}N × ${d}m ＝ <strong>${W}J</strong>。仕事率は ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                        ]
+                    };
+                }
+            }
+            else if (type === 'wheel') {
+                // 輪軸
+                const ratio = pick([2, 3, 4]);
+                const r_small = pick([5, 10, 15]); // cm
+                const R_large = r_small * ratio; // cm
+                const baseF = pick([4, 5, 6, 8, 10, 12, 15]); // 割り切れない小数を防ぐ
+                const weightN = baseF * ratio;
+                const F = baseF;
+                const h = pick([0.2, 0.3, 0.4, 0.5, 0.6]); // m
+                const d = fmt(h * ratio);
+                const W = fmt(weightN * h);
+                const validTimes = [1, 2, 3, 4, 5, 6].filter(t => (W / t) * 100 % 1 === 0);
+                const time = pick(validTimes.length ? validTimes : [1]);
+                const P = fmt(W / time);
+
+                const massKg = weightN / 10;
+                const massStr = formatMassText(massKg);
+                const hStr = formatDistText(h);
+
+                p = {
+                    ...p, weightN, massKg, r_small, R_large, ratio, h, d, time, massStr, hStr,
+                    ansF: F, ansD: d, ansW: W, ansP: P,
+                    q1Label: '(1) 大きい輪（半径' + R_large + 'cm）のひもを引く力は？',
+                    q2Label: '(2) 大きい輪のひもを引いた長さは？',
+                    statement: `半径 <strong class="text-blue-700 underline">${r_small}cm</strong> の軸（小さい輪）と、半径 <strong class="text-blue-700 underline">${R_large}cm</strong> の輪（大きい輪）でできた輪軸があります。小さい軸のひもに質量 <strong class="text-blue-700 underline">${massStr}</strong> のおもりをつけ、大きい輪のひもを引いておもりを <strong class="text-blue-700 underline">${hStr}</strong> の高さまで <strong class="text-blue-700 underline">${time}秒間</strong> で引き上げました。`,
+                    condition: '※輪軸やひもの重さ、摩擦は考えないものとします。',
+                    hint: `輪軸は「回転するてこ」です！中心が「支点」、小さい半径（${r_small}cm）が「作用点までの距離」、大きい半径（${R_large}cm）が「力点までの距離」と同じ働きをします。半径の比が 1：${ratio} なので、力は 1/${ratio}、引く長さは ${ratio}倍 です！`,
+                    explanation: [
+                        `<strong>① 半径の比（てこの原理と同じ）：</strong> 小さい軸の半径 ${r_small}cm と大きい輪の半径 ${R_large}cm の比は <strong>1：${ratio}</strong> です。`,
+                        `<strong>② 引く力(1)：</strong> おもりの重力は ${massStr} ＝ <strong>${weightN}N</strong>。大きい輪の半径が ${ratio}倍 なので、引く力は 1/${ratio} の ${weightN}N ÷ ${ratio} ＝ <strong>${F}N</strong> です。`,
+                        `<strong>③ 引く長さ(2)：</strong> おもりを ${hStr} ＝ <strong>${h}m</strong> 引き上げるとき、半径が ${ratio}倍 の大きい輪のひもは ${h}m × ${ratio} ＝ <strong>${d}m</strong> 引き出されます。`,
+                        `<strong>④ 仕事(3)と仕事率(4)：</strong> 仕事は ${F}N × ${d}m ＝ <strong>${W}J</strong>。仕事率は ${W}J ÷ ${time}秒 ＝ <strong>${P}W</strong> です。`
+                    ]
+                };
+            }
+
+            currentProblem = p;
+
+            // DOM更新
+            document.getElementById('problem-statement').innerHTML = p.statement;
+            document.getElementById('problem-condition').textContent = p.condition;
+            document.getElementById('label-q1').textContent = p.q1Label;
+            document.getElementById('label-q2').textContent = p.q2Label;
+            document.getElementById('hint-text').textContent = p.hint;
+
+            updateSimulator(0);
+        }
+
+        // シミュレーターSVGの描画更新
+        function updateSimulator(progressVal) {
+            if (!currentProblem) return;
+            const prog = Number(progressVal) / 100; // 0.0 〜 1.0
+            const p = currentProblem;
+            const svg = document.getElementById('sim-svg');
+
+            let html = `
+                <defs>
+                    <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#e11d48" />
+                    </marker>
+                    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb" />
+                    </marker>
+                    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669" />
+                    </marker>
+                </defs>
+            `;
+
+            if (p.type === 'slope') {
+                // 斜面描画
+                // 三角形: 左下(70, 250), 右下(380, 250), 右上(380, 100)
+                const x1 = 70, y1 = 250, x2 = 380, y2 = 100;
+                const curX = x1 + (x2 - x1) * 0.75 * prog + 30;
+                const curY = y1 + (y2 - y1) * 0.75 * prog - 15;
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+                html += `
+                    <!-- 床と斜面 -->
+                    <polygon points="70,250 380,250 380,100" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>
+                    <line x1="30" y1="250" x2="460" y2="250" stroke="#334155" stroke-width="3"/>
+                    
+                    <!-- 高さガイド -->
+                    <line x1="405" y1="250" x2="405" y2="100" stroke="#059669" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="415" y="180" fill="#059669" font-size="13" font-weight="bold">高さ ${p.hStr}</text>
+                    ${showHint ? `<text x="415" y="198" fill="#059669" font-size="12" font-weight="bold">(${p.h}m)</text>` : ''}
+
+                    <!-- 斜面距離ガイド -->
+                    <line x1="65" y1="230" x2="365" y2="85" stroke="#2563eb" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="160" y="145" fill="#2563eb" font-size="13" font-weight="bold" text-anchor="middle" transform="rotate(${angle}, 180, 145)">斜面の距離 ${p.LStr} ${showHint ? `(${p.L}m)` : ''}</text>
+
+                    <!-- 台車 -->
+                    <g transform="translate(${curX}, ${curY}) rotate(${angle})">
+                        <rect x="-28" y="-26" width="56" height="22" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                        <circle cx="-15" cy="-2" r="6" fill="#1e293b"/>
+                        <circle cx="15" cy="-2" r="6" fill="#1e293b"/>
+                        <text x="0" y="-11" fill="white" font-size="11" font-weight="bold" text-anchor="middle">${p.massStr}</text>
+                        <!-- 引く力ベクトル -->
+                        <line x1="28" y1="-15" x2="80" y2="-15" stroke="#e11d48" stroke-width="3.5" marker-end="url(#arrow-red)"/>
+                        <text x="65" y="-25" fill="#e11d48" font-size="12" font-weight="bold" text-anchor="middle">引く力 ${showHint ? `${p.ansF}N` : '? N'}</text>
+                    </g>
+
+                    <!-- 重力表示 -->
+                    ${showHint ? `
+                        <line x1="${curX}" y1="${curY}" x2="${curX}" y2="${curY + 45}" stroke="#64748b" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+                        <text x="${curX}" y="${curY + 62}" fill="#475569" font-size="11" font-weight="bold" text-anchor="middle">重力 ${p.weightN}N</text>
+                    ` : ''}
+                `;
+            }
+            else if (p.type === 'friction') {
+                // 摩擦力描画
+                const startX = 90;
+                const endX = 320;
+                const curX = startX + (endX - startX) * prog;
+
+                html += `
+                    <!-- 床（ザラザラ表現） -->
+                    <rect x="40" y="220" width="420" height="20" fill="#cbd5e1"/>
+                    <line x1="40" y1="220" x2="460" y2="220" stroke="#334155" stroke-width="3"/>
+                    
+                    <!-- 移動距離ガイド -->
+                    <line x1="${startX}" y1="258" x2="${endX}" y2="258" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                    <text x="${(startX + endX)/2}" y="278" fill="#2563eb" font-size="13" font-weight="bold" text-anchor="middle">動かした距離 ${p.dStr} ${showHint ? `(${p.d}m)` : ''} (現在: ${fmt(p.d * prog)}m)</text>
+
+                    <!-- 元の位置ゴースト -->
+                    <rect x="${startX - 35}" y="170" width="70" height="50" fill="none" stroke="#94a3b8" stroke-dasharray="4" stroke-width="1.5"/>
+
+                    <!-- 物体 -->
+                    <g transform="translate(${curX}, 170)">
+                        <rect x="-35" y="0" width="70" height="50" rx="4" fill="#f59e0b" stroke="#b45309" stroke-width="2.5"/>
+                        <text x="0" y="28" fill="white" font-size="13" font-weight="bold" text-anchor="middle">${p.massStr}</text>
+
+                        <!-- 引く力ベクトル（右向き） -->
+                        <line x1="35" y1="25" x2="105" y2="25" stroke="#e11d48" stroke-width="3.5" marker-end="url(#arrow-red)"/>
+                        <text x="75" y="15" fill="#e11d48" font-size="12" font-weight="bold" text-anchor="middle">引く力 ${showHint ? `${p.ansF}N` : '? N'}</text>
+
+                        ${showHint ? `
+                            <!-- 摩擦力ベクトル（左向き） -->
+                            <line x1="-35" y1="45" x2="-90" y2="45" stroke="#059669" stroke-width="3.5" marker-end="url(#arrow-green)"/>
+                            <text x="-65" y="36" fill="#059669" font-size="12" font-weight="bold" text-anchor="middle">摩擦力 ${p.F}N</text>
+                            <text x="0" y="-12" fill="#64748b" font-size="11" font-weight="bold" text-anchor="middle">※重力(${p.weightN}N)の向きには動かないので無関係！</text>
+                        ` : ''}
+                    </g>
+                `;
+            }
+            else if (p.type === 'lever1') {
+                // てこ（シーソー型）
+                // 支点の位置を比率に合わせて配置
+                const totalBarPx = 340;
+                const leftPx = Math.round(totalBarPx * (1 / (1 + p.ratio)));
+                const rightPx = totalBarPx - leftPx;
+                const pivotX = 80 + leftPx;
+                const pivotY = 175;
+
+                // 回転角（prog=0で左が少し下がり、prog=1で右が下がる）
+                const deg = -8 + 20 * prog;
+                const rad = deg * Math.PI / 180;
+
+                const leftEndX = pivotX - leftPx * Math.cos(rad);
+                const leftEndY = pivotY - leftPx * Math.sin(rad);
+                const rightEndX = pivotX + rightPx * Math.cos(rad);
+                const rightEndY = pivotY + rightPx * Math.sin(rad);
+
+                html += `
+                    <!-- 床と支点 -->
+                    <line x1="40" y1="265" x2="460" y2="265" stroke="#334155" stroke-width="3"/>
+                    <polygon points="${pivotX},${pivotY} ${pivotX-22},265 ${pivotX+22},265" fill="#64748b" stroke="#334155" stroke-width="2"/>
+                    <circle cx="${pivotX}" cy="${pivotY}" r="5" fill="#ef4444"/>
+                    <text x="${pivotX}" y="283" fill="#334155" font-size="12" font-weight="bold" text-anchor="middle">支点</text>
+
+                    <!-- 距離ガイド（上部） -->
+                    <line x1="80" y1="65" x2="${pivotX}" y2="65" stroke="#059669" stroke-width="2"/>
+                    <line x1="${pivotX}" y1="65" x2="420" y2="65" stroke="#2563eb" stroke-width="2"/>
+                    <line x1="80" y1="58" x2="80" y2="72" stroke="#059669" stroke-width="2"/>
+                    <line x1="${pivotX}" y1="55" x2="${pivotX}" y2="75" stroke="#334155" stroke-width="2"/>
+                    <line x1="420" y1="58" x2="420" y2="72" stroke="#2563eb" stroke-width="2"/>
+                    <text x="${(80+pivotX)/2}" y="52" fill="#059669" font-size="12" font-weight="bold" text-anchor="middle">${p.L_load}cm (比 1)</text>
+                    <text x="${(pivotX+420)/2}" y="52" fill="#2563eb" font-size="12" font-weight="bold" text-anchor="middle">${p.L_effort}cm (比 ${p.ratio})</text>
+
+                    <!-- てこの棒 -->
+                    <line x1="${leftEndX}" y1="${leftEndY}" x2="${rightEndX}" y2="${rightEndY}" stroke="#92400e" stroke-width="8" stroke-linecap="round"/>
+
+                    <!-- おもり（左端） -->
+                    <line x1="${leftEndX}" y1="${leftEndY}" x2="${leftEndX}" y2="${leftEndY + 35}" stroke="#475569" stroke-width="2"/>
+                    <rect x="${leftEndX - 24}" y="${leftEndY + 35}" width="48" height="38" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                    <text x="${leftEndX}" y="${leftEndY + 58}" fill="white" font-size="11" font-weight="bold" text-anchor="middle">${p.massStr}</text>
+                    <text x="${leftEndX - 30}" y="${leftEndY - 10}" fill="#059669" font-size="12" font-weight="bold" text-anchor="end">↑ 上がる高さ ${p.hStr} ${showHint ? `(${p.h}m)` : ''}</text>
+
+                    <!-- 力点（右端） -->
+                    <line x1="${rightEndX}" y1="${rightEndY}" x2="${rightEndX}" y2="${rightEndY + 60}" stroke="#e11d48" stroke-width="4" marker-end="url(#arrow-red)"/>
+                    <text x="${rightEndX}" y="${rightEndY + 80}" fill="#e11d48" font-size="12" font-weight="bold" text-anchor="middle">押す力 ${showHint ? `${p.ansF}N` : '? N'}</text>
+                    <text x="${rightEndX}" y="${rightEndY - 15}" fill="#2563eb" font-size="12" font-weight="bold" text-anchor="middle">↓ 押す距離 ${showHint ? `${p.ansD}m` : '? m'}</text>
+                `;
+            }
+            else if (p.type === 'lever2') {
+                // てこ（左端が支点）
+                const pivotX = 90, pivotY = 230;
+                const totalBarPx = 310;
+                const loadPx = Math.round(totalBarPx / p.ratio);
+
+                const deg = -5 - 22 * prog; // 上に持ち上げる
+                const rad = deg * Math.PI / 180;
+
+                const loadX = pivotX + loadPx * Math.cos(rad);
+                const loadY = pivotY + loadPx * Math.sin(rad);
+                const endX = pivotX + totalBarPx * Math.cos(rad);
+                const endY = pivotY + totalBarPx * Math.sin(rad);
+
+                html += `
+                    <!-- 床と左端支点 -->
+                    <line x1="40" y1="265" x2="460" y2="265" stroke="#334155" stroke-width="3"/>
+                    <polygon points="${pivotX},${pivotY} ${pivotX-20},265 ${pivotX+20},265" fill="#64748b" stroke="#334155" stroke-width="2"/>
+                    <circle cx="${pivotX}" cy="${pivotY}" r="5" fill="#ef4444"/>
+                    <text x="${pivotX}" y="283" fill="#ef4444" font-size="12" font-weight="bold" text-anchor="middle">支点(左端)</text>
+
+                    <!-- 支点からの距離ガイド -->
+                    <line x1="${pivotX}" y1="75" x2="${pivotX + loadPx}" y2="75" stroke="#059669" stroke-width="2.5"/>
+                    <text x="${pivotX + loadPx/2}" y="66" fill="#059669" font-size="11" font-weight="bold" text-anchor="middle">支点から ${p.L_load}cm</text>
+
+                    <line x1="${pivotX}" y1="45" x2="${pivotX + totalBarPx}" y2="45" stroke="#2563eb" stroke-width="2.5"/>
+                    <text x="${pivotX + totalBarPx/2}" y="35" fill="#2563eb" font-size="12" font-weight="bold" text-anchor="middle">支点から右端まで ${p.L_total}cm ${showHint ? `(比 1：${p.ratio})` : ''}</text>
+
+                    <!-- てこの棒 -->
+                    <line x1="${pivotX}" y1="${pivotY}" x2="${endX}" y2="${endY}" stroke="#92400e" stroke-width="8" stroke-linecap="round"/>
+
+                    <!-- おもり -->
+                    <line x1="${loadX}" y1="${loadY}" x2="${loadX}" y2="${loadY + 32}" stroke="#475569" stroke-width="2"/>
+                    <rect x="${loadX - 24}" y="${loadY + 32}" width="48" height="36" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                    <text x="${loadX}" y="${loadY + 54}" fill="white" font-size="11" font-weight="bold" text-anchor="middle">${p.massStr}</text>
+                    <text x="${loadX + 32}" y="${loadY + 52}" fill="#059669" font-size="11" font-weight="bold">↑高さ ${p.hStr}</text>
+
+                    <!-- 右端を引き上げる力 -->
+                    <line x1="${endX}" y1="${endY}" x2="${endX}" y2="${endY - 58}" stroke="#e11d48" stroke-width="4" marker-end="url(#arrow-red)"/>
+                    <text x="${endX}" y="${endY - 68}" fill="#e11d48" font-size="12" font-weight="bold" text-anchor="middle">引く力 ${showHint ? `${p.ansF}N` : '? N'}</text>
+                    <text x="${endX + 12}" y="${endY}" fill="#2563eb" font-size="12" font-weight="bold">↑ 引く距離 ${showHint ? `${p.ansD}m` : '? m'}</text>
+                `;
+            }
+            else if (p.type === 'pulley1' || (p.type === 'pulley2' && p.subMode === 'heavy_pulley')) {
+                // 動滑車1つ ＋ 定滑車1つ
+                const liftPx = 55 * prog;
+                const pullPx = liftPx * 2; // 2倍動く！
+                const movY = 195 - liftPx;
+                const handY = 120 + pullPx;
+
+                const isHeavy = p.type === 'pulley2';
+
+                html += `
+                    <!-- 天井 -->
+                    <rect x="80" y="20" width="340" height="12" fill="#94a3b8"/>
+                    <line x1="80" y1="32" x2="420" y2="32" stroke="#334155" stroke-width="3"/>
+
+                    <!-- ひも -->
+                    <!-- 天井(160,32) -> 動滑車左(160, movY) -->
+                    <line x1="160" y1="32" x2="160" y2="${movY}" stroke="#475569" stroke-width="2.5"/>
+                    <!-- 動滑車右(216, movY) -> 定滑車左(216, 70) -->
+                    <line x1="216" y1="${movY}" x2="216" y2="70" stroke="#475569" stroke-width="2.5"/>
+                    <!-- 定滑車右(272, 70) -> 手(272, handY) (糸は同じ色と太さ) -->
+                    <line x1="272" y1="70" x2="272" y2="${handY}" stroke="#475569" stroke-width="2.5"/>
+
+                    <!-- 定滑車 -->
+                    <line x1="244" y1="32" x2="244" y2="70" stroke="#334155" stroke-width="4"/>
+                    <circle cx="244" cy="70" r="28" fill="#cbd5e1" stroke="#334155" stroke-width="3"/>
+                    <circle cx="244" cy="70" r="5" fill="#334155"/>
+                    <text x="244" y="112" fill="#475569" font-size="10" font-weight="bold" text-anchor="middle">定滑車</text>
+
+                    <!-- 動滑車 -->
+                    <circle cx="188" cy="${movY}" r="28" fill="${isHeavy ? '#fde047' : '#e2e8f0'}" stroke="#334155" stroke-width="3"/>
+                    <circle cx="188" cy="${movY}" r="5" fill="#334155"/>
+                    ${isHeavy ? `<text x="188" y="${movY+4}" fill="#854d0e" font-size="10" font-weight="bold" text-anchor="middle">${p.pulleyStr}</text>` : ''}
+                    <text x="115" y="${movY}" fill="#334155" font-size="11" font-weight="bold" text-anchor="end">動滑車</text>
+
+                    <!-- おもり -->
+                    <line x1="188" y1="${movY}" x2="188" y2="${movY + 42}" stroke="#334155" stroke-width="3"/>
+                    <rect x="158" y="${movY + 42}" width="60" height="44" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                    <text x="188" y="${movY + 68}" fill="white" font-size="12" font-weight="bold" text-anchor="middle">${isHeavy ? p.loadStr : p.massStr}</text>
+
+                    <!-- おもり上昇ガイド -->
+                    <text x="145" y="${movY + 65}" fill="#059669" font-size="12" font-weight="bold" text-anchor="end">↑ 上がる高さ ${p.hStr} ${showHint ? `(${p.h}m)` : ''}</text>
+
+                    <!-- 引く力ベクトル (糸とは別の赤い矢印) -->
+                    <line x1="285" y1="${handY - 20}" x2="285" y2="${handY + 20}" stroke="#e11d48" stroke-width="3" marker-end="url(#arrow-red)"/>
+                    <text x="300" y="${handY}" fill="#e11d48" font-size="13" font-weight="bold">引く力 ${showHint ? `${p.ansF}N` : '? N'}</text>
+                    <text x="300" y="${handY + 20}" fill="#2563eb" font-size="12" font-weight="bold">↓ 引く長さ${showHint ? '(2倍)' : ''}: ${showHint ? `${p.ansD}m` : '? m'}</text>
+                `;
+            }
+            else if (p.type === 'pulley2' && p.subMode === 'double_pulley') {
+                // 動滑車2つ組み合わせ（力1/4, 距離4倍）
+                const liftPx = 28 * prog;
+                const mov1Y = 210 - liftPx;      // 下の動滑車
+                const mov2Y = 145 - liftPx * 2;  // 2つ目の動滑車
+                const handY = 95 + liftPx * 4;   // 引くひも（4倍動く）
+
+                html += `
+                    <!-- 天井 -->
+                    <rect x="60" y="18" width="380" height="10" fill="#94a3b8"/>
+                    <line x1="60" y1="28" x2="440" y2="28" stroke="#334155" stroke-width="3"/>
+
+                    <!-- 第1動滑車のひも: 天井(130) -> 動滑車1(130..174) -> 動滑車2の中心(174, mov2Y) -->
+                    <line x1="130" y1="28" x2="130" y2="${mov1Y}" stroke="#475569" stroke-width="2"/>
+                    <line x1="174" y1="${mov1Y}" x2="174" y2="${mov2Y}" stroke="#475569" stroke-width="2.5"/>
+
+                    <!-- 第2動滑車のひも: 天井(152) -> 動滑車2(152..196) -> 定滑車(196..240) -> 手 -->
+                    <line x1="152" y1="28" x2="152" y2="${mov2Y}" stroke="#475569" stroke-width="2.5"/>
+                    <line x1="196" y1="${mov2Y}" x2="196" y2="62" stroke="#475569" stroke-width="2.5"/>
+                    <line x1="240" y1="62" x2="240" y2="${handY}" stroke="#475569" stroke-width="2.5"/>
+
+                    <!-- 定滑車 -->
+                    <line x1="218" y1="28" x2="218" y2="62" stroke="#334155" stroke-width="3"/>
+                    <circle cx="218" cy="62" r="22" fill="#cbd5e1" stroke="#334155" stroke-width="2.5"/>
+
+                    <!-- 動滑車2（上） -->
+                    <circle cx="174" cy="${mov2Y}" r="22" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+                    <text x="174" y="${mov2Y+4}" fill="#0369a1" font-size="10" font-weight="bold" text-anchor="middle">動②</text>
+
+                    <!-- 動滑車1（下） -->
+                    <circle cx="152" cy="${mov1Y}" r="22" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+                    <text x="152" y="${mov1Y+4}" fill="#0369a1" font-size="10" font-weight="bold" text-anchor="middle">動①</text>
+
+                    <!-- おもり -->
+                    <line x1="152" y1="${mov1Y}" x2="152" y2="${mov1Y + 32}" stroke="#334155" stroke-width="3"/>
+                    <rect x="124" y="${mov1Y + 32}" width="56" height="40" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                    <text x="152" y="${mov1Y + 56}" fill="white" font-size="12" font-weight="bold" text-anchor="middle">${p.massStr}</text>
+                    <text x="115" y="${mov1Y + 55}" fill="#059669" font-size="11" font-weight="bold" text-anchor="end">↑高さ ${p.hStr}</text>
+
+                    <!-- 引く力ベクトル (糸とは別の赤い矢印) -->
+                    <line x1="255" y1="${handY - 20}" x2="255" y2="${handY + 20}" stroke="#e11d48" stroke-width="3" marker-end="url(#arrow-red)"/>
+                    <text x="270" y="${handY}" fill="#e11d48" font-size="13" font-weight="bold">引く力${showHint ? '(1/4)' : ''}: ${showHint ? `${p.ansF}N` : '? N'}</text>
+                    <text x="270" y="${handY + 20}" fill="#2563eb" font-size="12" font-weight="bold">↓ 引く長さ${showHint ? '(4倍)' : ''}: ${showHint ? `${p.ansD}m` : '? m'}</text>
+                `;
+            }
+            else if (p.type === 'pulley2' && p.subMode === 'triple_pulley') {
+                // 動滑車3つ直列（力1/8, 距離8倍）
+                const liftPx = 15 * prog; // 1/8だと引き量が大きいので少し小さめに設定
+                const mov1Y = 220 - liftPx;      // 動1 (下)
+                const mov2Y = 175 - liftPx * 2;  // 動2 (中)
+                const mov3Y = 130 - liftPx * 4;  // 動3 (上)
+                const handY = 85 + liftPx * 8;   // 手 (8倍)
+
+                html += `
+                    <!-- 天井 -->
+                    <rect x="60" y="10" width="380" height="10" fill="#94a3b8"/>
+                    <line x1="60" y1="20" x2="440" y2="20" stroke="#334155" stroke-width="3"/>
+
+                    <!-- ひも1(動1->動2) -->
+                    <line x1="120" y1="20" x2="120" y2="${mov1Y}" stroke="#475569" stroke-width="2.5"/>
+                    <line x1="156" y1="${mov1Y}" x2="156" y2="${mov2Y}" stroke="#475569" stroke-width="2.5"/>
+
+                    <!-- ひも2(動2->動3) -->
+                    <line x1="138" y1="20" x2="138" y2="${mov2Y}" stroke="#475569" stroke-width="2.5"/>
+                    <line x1="174" y1="${mov2Y}" x2="174" y2="${mov3Y}" stroke="#475569" stroke-width="2.5"/>
+
+                    <!-- ひも3(動3->定滑車->手) -->
+                    <line x1="156" y1="20" x2="156" y2="${mov3Y}" stroke="#475569" stroke-width="2.5"/>
+                    <line x1="192" y1="${mov3Y}" x2="192" y2="50" stroke="#475569" stroke-width="2.5"/>
+                    <line x1="228" y1="50" x2="228" y2="${handY}" stroke="#475569" stroke-width="2.5"/>
+
+                    <!-- 定滑車 -->
+                    <line x1="210" y1="20" x2="210" y2="50" stroke="#334155" stroke-width="3"/>
+                    <circle cx="210" cy="50" r="18" fill="#cbd5e1" stroke="#334155" stroke-width="2.5"/>
+
+                    <!-- 動滑車3（上） -->
+                    <circle cx="174" cy="${mov3Y}" r="18" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+                    <text x="174" y="${mov3Y+3}" fill="#0369a1" font-size="9" font-weight="bold" text-anchor="middle">動③</text>
+
+                    <!-- 動滑車2（中） -->
+                    <circle cx="156" cy="${mov2Y}" r="18" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+                    <text x="156" y="${mov2Y+3}" fill="#0369a1" font-size="9" font-weight="bold" text-anchor="middle">動②</text>
+
+                    <!-- 動滑車1（下） -->
+                    <circle cx="138" cy="${mov1Y}" r="18" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+                    <text x="138" y="${mov1Y+3}" fill="#0369a1" font-size="9" font-weight="bold" text-anchor="middle">動①</text>
+
+                    <!-- おもり -->
+                    <line x1="138" y1="${mov1Y}" x2="138" y2="${mov1Y + 25}" stroke="#334155" stroke-width="3"/>
+                    <rect x="114" y="${mov1Y + 25}" width="48" height="34" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                    <text x="138" y="${mov1Y + 45}" fill="white" font-size="10" font-weight="bold" text-anchor="middle">${p.massStr}</text>
+
+                    <!-- 力ベクトル -->
+                    <line x1="240" y1="${handY - 15}" x2="240" y2="${handY + 15}" stroke="#e11d48" stroke-width="3" marker-end="url(#arrow-red)"/>
+                    <text x="250" y="${handY}" fill="#e11d48" font-size="12" font-weight="bold">引く力${showHint ? '(1/8)' : ''}: ${showHint ? `${p.ansF}N` : '? N'}</text>
+                    <text x="250" y="${handY + 18}" fill="#2563eb" font-size="11" font-weight="bold">↓ 長さ${showHint ? '(8倍)' : ''}: ${showHint ? `${p.ansD}m` : '? m'}</text>
+                `;
+            }
+            else if (p.type === 'pulley2' && p.subMode === 'board_pulley') {
+                // 板の左右に動滑車（力1/4, 距離4倍）
+                const liftPx = 30 * prog;
+                const movY = 190 - liftPx;
+                const handY = 110 + liftPx * 4; // 4倍引く
+
+                html += `
+                    <!-- 天井 -->
+                    <rect x="40" y="20" width="420" height="10" fill="#94a3b8"/>
+                    <line x1="40" y1="30" x2="460" y2="30" stroke="#334155" stroke-width="3"/>
+
+                    <!-- 1本のひもを連続して描画 (滑車の溝に沿って曲がる) -->
+                    <!-- 固定端(100,30) -> 動L(左) -->
+                    <line x1="100" y1="30" x2="100" y2="${movY}" stroke="#475569" stroke-width="2.5"/>
+                    <path d="M 100 ${movY} A 20 20 0 0 0 140 ${movY}" fill="none" stroke="#475569" stroke-width="2.5"/>
+                    <!-- 動L(右) -> 定1(左) -->
+                    <line x1="140" y1="${movY}" x2="140" y2="60" stroke="#475569" stroke-width="2.5"/>
+                    <path d="M 140 60 A 20 20 0 0 1 160 40" fill="none" stroke="#475569" stroke-width="2.5"/>
+                    <!-- 定1(上) -> 定2(上) -->
+                    <line x1="160" y1="40" x2="240" y2="40" stroke="#475569" stroke-width="2.5"/>
+                    <path d="M 240 40 A 20 20 0 0 1 260 60" fill="none" stroke="#475569" stroke-width="2.5"/>
+                    <!-- 定2(右) -> 動R(左) -->
+                    <line x1="260" y1="60" x2="260" y2="${movY}" stroke="#475569" stroke-width="2.5"/>
+                    <path d="M 260 ${movY} A 20 20 0 0 0 300 ${movY}" fill="none" stroke="#475569" stroke-width="2.5"/>
+                    <!-- 動R(右) -> 定3(左) -->
+                    <line x1="300" y1="${movY}" x2="300" y2="60" stroke="#475569" stroke-width="2.5"/>
+                    <path d="M 300 60 A 20 20 0 0 1 320 40" fill="none" stroke="#475569" stroke-width="2.5"/>
+                    <path d="M 320 40 A 20 20 0 0 1 340 60" fill="none" stroke="#475569" stroke-width="2.5"/>
+                    <!-- 定3(右) -> 手 -->
+                    <line x1="340" y1="60" x2="340" y2="${handY}" stroke="#475569" stroke-width="2.5"/>
+
+                    <!-- 定滑車の吊るし具 -->
+                    <line x1="160" y1="30" x2="160" y2="60" stroke="#334155" stroke-width="4"/>
+                    <line x1="240" y1="30" x2="240" y2="60" stroke="#334155" stroke-width="4"/>
+                    <line x1="320" y1="30" x2="320" y2="60" stroke="#334155" stroke-width="4"/>
+
+                    <!-- 定滑車1, 2, 3 -->
+                    <circle cx="160" cy="60" r="20" fill="#cbd5e1" stroke="#334155" stroke-width="2.5"/>
+                    <circle cx="160" cy="60" r="4" fill="#334155"/>
+                    <circle cx="240" cy="60" r="20" fill="#cbd5e1" stroke="#334155" stroke-width="2.5"/>
+                    <circle cx="240" cy="60" r="4" fill="#334155"/>
+                    <circle cx="320" cy="60" r="20" fill="#cbd5e1" stroke="#334155" stroke-width="2.5"/>
+                    <circle cx="320" cy="60" r="4" fill="#334155"/>
+
+                    <!-- 動滑車L, R -->
+                    <circle cx="120" cy="${movY}" r="20" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+                    <circle cx="120" cy="${movY}" r="4" fill="#0284c7"/>
+                    <circle cx="280" cy="${movY}" r="20" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+                    <circle cx="280" cy="${movY}" r="4" fill="#0284c7"/>
+
+                    <!-- 板 -->
+                    <rect x="120" y="${movY + 20}" width="160" height="8" fill="#d97706" stroke="#92400e" stroke-width="2"/>
+                    
+                    <!-- おもり -->
+                    <rect x="175" y="${movY - 20}" width="50" height="40" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                    <text x="200" y="${movY + 5}" fill="white" font-size="12" font-weight="bold" text-anchor="middle">${p.massStr}</text>
+
+                    <!-- 4本のひも解説 -->
+                    ${showHint ? `
+                        <text x="200" y="${movY + 50}" fill="#059669" font-size="11" font-weight="bold" text-anchor="middle">↑合計4本のひもで支える</text>
+                    ` : ''}
+
+                    <!-- 力ベクトル -->
+                    <line x1="355" y1="${handY - 20}" x2="355" y2="${handY + 20}" stroke="#e11d48" stroke-width="3" marker-end="url(#arrow-red)"/>
+                    <text x="365" y="${handY}" fill="#e11d48" font-size="12" font-weight="bold">引く力${showHint ? '(1/4)' : ''}: ${showHint ? `${p.ansF}N` : '? N'}</text>
+                    <text x="365" y="${handY + 20}" fill="#2563eb" font-size="11" font-weight="bold">↓ 長さ${showHint ? '(4倍)' : ''}: ${showHint ? `${p.ansD}m` : '? m'}</text>
+                `;
+            }
+            else if (p.type === 'wheel') {
+                // 輪軸描画
+                const cx = 210, cy = 120;
+                const Rpx = 82; // 大きい輪
+                const rpx = Math.round(Rpx / p.ratio); // 小さい軸
+                const rotDeg = prog * 180;
+
+                const loadY = 235 - 45 * prog;
+                const pullY = 175 + 45 * p.ratio * prog * 0.6;
+
+                html += `
+                    <!-- 大きい輪 -->
+                    <g transform="rotate(${rotDeg}, ${cx}, ${cy})">
+                        <circle cx="${cx}" cy="${cy}" r="${Rpx}" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
+                        <line x1="${cx - Rpx}" y1="${cy}" x2="${cx + Rpx}" y2="${cy}" stroke="#bae6fd" stroke-width="2"/>
+                        <line x1="${cx}" y1="${cy - Rpx}" x2="${cx}" y2="${cy + Rpx}" stroke="#bae6fd" stroke-width="2"/>
+                    </g>
+
+                    <!-- ひも（左：小さい軸からおもりへ、右：大きい輪から手へ） -->
+                    <!-- 大きい輪の手前に描画することで、糸が切れて見えるのを防ぐ -->
+                    <line x1="${cx - rpx}" y1="${cy}" x2="${cx - rpx}" y2="${loadY}" stroke="#475569" stroke-width="3"/>
+                    <line x1="${cx + Rpx}" y1="${cy}" x2="${cx + Rpx}" y2="${pullY}" stroke="#475569" stroke-width="3"/>
+
+                    <!-- 小さい軸 -->
+                    <circle cx="${cx}" cy="${cy}" r="${rpx}" fill="#fef08a" stroke="#ca8a04" stroke-width="3"/>
+                    <circle cx="${cx}" cy="${cy}" r="5" fill="#1e293b"/>
+
+                    <!-- 半径ガイド（てこの見立て） -->
+                    <line x1="${cx}" y1="${cy}" x2="${cx - rpx}" y2="${cy}" stroke="#059669" stroke-width="3"/>
+                    <line x1="${cx}" y1="${cy}" x2="${cx + Rpx}" y2="${cy}" stroke="#2563eb" stroke-width="3"/>
+                    <text x="${cx - rpx/2}" y="${cy - 10}" fill="#059669" font-size="11" font-weight="bold" text-anchor="middle">${p.r_small}cm</text>
+                    <text x="${cx + Rpx/2}" y="${cy - 10}" fill="#2563eb" font-size="12" font-weight="bold" text-anchor="middle">半径 ${p.R_large}cm (比 ${p.ratio})</text>
+
+                    <!-- おもり -->
+                    <rect x="${cx - rpx - 26}" y="${loadY}" width="52" height="38" rx="4" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                    <text x="${cx - rpx}" y="${loadY + 23}" fill="white" font-size="11" font-weight="bold" text-anchor="middle">${p.massStr}</text>
+                    <text x="${cx - rpx - 32}" y="${loadY + 22}" fill="#059669" font-size="12" font-weight="bold" text-anchor="end">↑高さ ${p.hStr}</text>
+
+                    <!-- 右の引く力 -->
+                    <line x1="${cx + Rpx}" y1="${pullY}" x2="${cx + Rpx}" y2="${pullY + 40}" stroke="#e11d48" stroke-width="4" marker-end="url(#arrow-red)"/>
+                    <text x="${cx + Rpx + 12}" y="${pullY + 18}" fill="#e11d48" font-size="13" font-weight="bold">引く力 ${showHint ? `${p.ansF}N` : '? N'}</text>
+                    <text x="${cx + Rpx + 12}" y="${pullY + 38}" fill="#2563eb" font-size="12" font-weight="bold">↓ 引く長さ ${showHint ? `${p.ansD}m` : '? m'}</text>
+                `;
+            }
+
+            svg.innerHTML = html;
+        }
+
+        // 単位換算ミスなどの診断メッセージ生成
+        function diagnoseError(userVal, correctVal, type) {
+            if (isNaN(userVal)) return '数値を入力してください。';
+            if (Math.abs(userVal - correctVal * 100) < 0.1) {
+                return '💡 惜しい！cm（センチメートル）のまま計算していませんか？ m（メートル）に直しましょう！';
+            }
+            if (Math.abs(userVal - correctVal * 10) < 0.1 || Math.abs(userVal - correctVal * 1000) < 0.1) {
+                return '💡 惜しい！質量(gやkg)をそのまま使っています。「100g ＝ 1N（1kg ＝ 10N）」に直しましょう！';
+            }
+            if (type === 'f' && currentProblem.type === 'friction' && Math.abs(userVal - currentProblem.weightN) < 0.1) {
+                return '💡 ひっかけ注意！水平に動かすときは、重力ではなく「摩擦力」とつり合います！';
+            }
+            if (type === 'f' && Math.abs(userVal - correctVal * 2) < 0.1) {
+                return '💡 道具を使うことで力が半分（または比率分）になるのを忘れていませんか？';
+            }
+            if (type === 'd' && Math.abs(userVal - correctVal / 2) < 0.1) {
+                return '💡 おもりが上がった高さではなく、自分が「ひもを引いた長さ（倍になる）」を答えましょう！';
+            }
+            return `正解は ${correctVal} です。下の解説ステップを確認しましょう！`;
+        }
+
+        // 答え合わせ処理
+        function checkAnswers() {
+            if (!currentProblem) return;
+            const p = currentProblem;
+
+            const checks = [
+                { key: 'f', ans: p.ansF, cardId: 'card-q1', unit: 'N' },
+                { key: 'd', ans: p.ansD, cardId: 'card-q2', unit: 'm' },
+                { key: 'w', ans: p.ansW, cardId: 'card-q3', unit: 'J' },
+                { key: 'p', ans: p.ansP, cardId: 'card-q4', unit: 'W' }
+            ];
+
+            let allCorrect = true;
+
+            checks.forEach(item => {
+                const inputEl = document.getElementById(`input-${item.key}`);
+                const val = parseFloat(inputEl.value);
+                const markEl = document.getElementById(`mark-${item.key}`);
+                const fbEl = document.getElementById(`feedback-${item.key}`);
+                const cardEl = document.getElementById(item.cardId);
+
+                const isOk = !isNaN(val) && Math.abs(val - item.ans) < 0.05;
+
+                fbEl.classList.remove('hidden');
+                if (isOk) {
+                    markEl.innerHTML = '⭕';
+                    cardEl.className = 'p-3 rounded-xl bg-emerald-50/70 border-2 border-emerald-400 transition';
+                    fbEl.className = 'text-xs mt-1.5 font-bold text-emerald-700';
+                    fbEl.innerHTML = `大正解！ (${item.ans} ${item.unit})`;
+                } else {
+                    allCorrect = false;
+                    markEl.innerHTML = '❌';
+                    cardEl.className = 'p-3 rounded-xl bg-rose-50/70 border-2 border-rose-400 transition';
+                    fbEl.className = 'text-xs mt-1.5 font-bold text-rose-700';
+                    fbEl.innerHTML = diagnoseError(val, item.ans, item.key);
+                }
+            });
+
+            if (!hasScoredCurrent) {
+                scoreTotal++;
+                if (allCorrect) scoreCorrect++;
+                hasScoredCurrent = true;
+                document.getElementById('score-correct').textContent = scoreCorrect;
+                document.getElementById('score-total').textContent = scoreTotal;
+            }
+
+            // 解説パネル表示
+            const expPanel = document.getElementById('explanation-panel');
+            const expContent = document.getElementById('explanation-content');
+            expContent.innerHTML = p.explanation.map(line => `<div class="p-2 bg-slate-50 rounded-lg border border-slate-200">${line}</div>`).join('');
+            expPanel.classList.remove('hidden');
+
+            // 解答後はヒント（数値表示）をONにし、スライダーを100%にアニメーション移動
+            if (!showHint) {
+                toggleHintMode();
+            }
+            animateSliderTo100();
+        }
+
+        // 解答時にシミュレーターをスムーズに動かす演出
+        function animateSliderTo100() {
+            const slider = document.getElementById('sim-slider');
+            let current = 0;
+            slider.value = 0;
+            const interval = setInterval(() => {
+                current += 5;
+                if (current >= 100) {
+                    current = 100;
+                    clearInterval(interval);
+                }
+                slider.value = current;
+                updateSimulator(current);
+            }, 25);
+        }
+
+        // 初期起動
+        window.onload = function () {
+            generateProblem();
+        };
+    </script>
+</body>
+</html>
